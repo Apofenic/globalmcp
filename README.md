@@ -1,0 +1,2 @@
+# globalmcp
+global MCP
