@@ -1,0 +1,86 @@
+# Docker Compose configuration for Global MCP Server
+# Supports both development and production deployments
+
+version: "3.8"
+
+services:
+  globalmcp:
+    build:
+      context: .
+      target: development # Use 'production' for production builds
+    container_name: globalmcp-server
+    ports:
+      - "8000:8000"
+    volumes:
+      # Development: Mount source code for hot reload
+      - .:/app
+      # Share Ollama models between host and container
+      - ~/.ollama:/home/mcpuser/.ollama
+      # Persist MCP configuration
+      - ./.vscode:/app/.vscode
+      - ./config:/app/config
+    environment:
+      - MCP_SERVER_HOST=0.0.0.0
+      - MCP_SERVER_PORT=8000
+      - PYTHONPATH=/app
+      # Optional: Set log level
+      - LOG_LEVEL=INFO
+    networks:
+      - mcp-network
+    depends_on:
+      - ollama
+    restart: unless-stopped
+    # Resource limits (adjust based on your needs)
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: "0.5"
+        reservations:
+          memory: 512M
+          cpus: "0.25"
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-server
+    ports:
+      - "11434:11434"
+    volumes:
+      # Persist Ollama models
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+    networks:
+      - mcp-network
+    restart: unless-stopped
+    # GPU support (uncomment if you have NVIDIA GPU)
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: 1
+    #           capabilities: [gpu]
+
+  # Optional: Redis for caching (uncomment if needed)
+  # redis:
+  #   image: redis:7-alpine
+  #   container_name: redis-cache
+  #   ports:
+  #     - "6379:6379"
+  #   volumes:
+  #     - redis_data:/data
+  #   networks:
+  #     - mcp-network
+  #   restart: unless-stopped
+
+networks:
+  mcp-network:
+    driver: bridge
+    name: mcp-network
+
+volumes:
+  ollama_data:
+    name: ollama_models
+  # redis_data:
+  #   name: redis_cache

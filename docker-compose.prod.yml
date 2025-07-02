@@ -1,0 +1,104 @@
+# Production Docker Compose configuration for Global MCP Server
+# Optimized for production deployments with minimal overhead
+
+version: "3.8"
+
+services:
+  globalmcp:
+    build:
+      context: .
+      target: production
+    container_name: globalmcp-server-prod
+    ports:
+      - "8000:8000"
+    volumes:
+      # Production: Only mount necessary config and data
+      - ./config:/app/config:ro
+      - globalmcp_logs:/app/logs
+    environment:
+      - MCP_SERVER_HOST=0.0.0.0
+      - MCP_SERVER_PORT=8000
+      - PYTHONPATH=/app
+      - LOG_LEVEL=WARNING
+      - ENVIRONMENT=production
+    networks:
+      - mcp-network
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: always
+    # Production resource limits
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: "1.0"
+        reservations:
+          memory: 1G
+          cpus: "0.5"
+    # Security settings
+    read_only: true
+    tmpfs:
+      - /tmp
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    cap_add:
+      - NET_BIND_SERVICE
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: ollama-server-prod
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    environment:
+      - OLLAMA_HOST=0.0.0.0
+      - OLLAMA_KEEP_ALIVE=24h
+    networks:
+      - mcp-network
+    restart: always
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+    # Production resource limits for Ollama
+    deploy:
+      resources:
+        limits:
+          memory: 4G
+          cpus: "2.0"
+        reservations:
+          memory: 2G
+          cpus: "1.0"
+
+  # Production reverse proxy (optional)
+  nginx:
+    image: nginx:alpine
+    container_name: nginx-proxy
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    networks:
+      - mcp-network
+    depends_on:
+      - globalmcp
+    restart: always
+
+networks:
+  mcp-network:
+    driver: bridge
+    name: mcp-network-prod
+
+volumes:
+  ollama_data:
+    name: ollama_models_prod
+  globalmcp_logs:
+    name: globalmcp_logs_prod
