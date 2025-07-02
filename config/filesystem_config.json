@@ -1,0 +1,9 @@
+{
+    "allowed_paths": [
+        "/Users/anthonylubrino/globalmcp",
+        "/tmp/mcp_workspace"
+    ],
+    "readonly": false,
+    "max_file_size_mb": 10,
+    "enabled": true
+}

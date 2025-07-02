@@ -1,0 +1,15 @@
+{
+    "models": {
+        "phi3": "ollama://phi3",
+        "mistral": "ollama://mistral",
+        "llama3": "ollama://llama3",
+        "mock-simple": "mock://simple",
+        "mock-moderate": "mock://moderate",
+        "mock-complex": "mock://complex"
+    },
+    "complexity_mapping": {
+        "simple": "ollama://phi3",
+        "moderate": "ollama://mistral",
+        "complex": "ollama://llama3"
+    }
+}

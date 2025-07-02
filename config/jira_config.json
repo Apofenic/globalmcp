@@ -1,0 +1,8 @@
+{
+    "url": "${JIRA_URL}",
+    "username": "${JIRA_USERNAME}",
+    "api_token": "${JIRA_API_TOKEN}",
+    "project_key": "DEV",
+    "default_issue_type": "Task",
+    "enabled": true
+}
