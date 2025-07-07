@@ -1,6 +1,6 @@
 # Global MCP Server
 
-A modular MCP (Model Context Protocol) server that extends GitHub Copilot's capabilities by providing intelligent context compression and dynamic model routing for long-lived coding sessions.
+A modular MCP (Model Context Protocol) server experiments with intelligent context compression and dynamic model routing with local models for long-lived coding sessions.
 
 ## Overview
 
