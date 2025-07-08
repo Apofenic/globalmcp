@@ -1,4 +1,4 @@
-# Global MCP Server
+# MCP Prompt Router
 
 A modular MCP (Model Context Protocol) server experiments with intelligent context compression and dynamic model routing with local models for long-lived coding sessions.
 
